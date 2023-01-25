@@ -1,6 +1,11 @@
+variable "vault_address" {
+  type    = string
+  default = "https://vault.service.consul:8200"
+}
+
 variable "consul_address" {
   type    = string
-  default = "http://127.0.0.1:8500"
+  default = "https://consul.service.consul:8501"
 }
 
 variable "consul_token" {
