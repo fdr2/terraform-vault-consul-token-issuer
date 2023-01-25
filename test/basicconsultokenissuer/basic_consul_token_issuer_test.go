@@ -16,8 +16,8 @@ import (
 )
 
 type VaultConsulSecretsEngineConfig struct {
-	RequestId     string `json:"request_id"`
-	LeaseId       string `json:"lease_id"`
+	RequestID     string `json:"request_id"`
+	LeaseID       string `json:"lease_id"`
 	Renewable     bool   `json:"renewable"`
 	LeaseDuration int    `json:"lease_duration"`
 	Data          struct {
@@ -30,19 +30,20 @@ type VaultConsulSecretsEngineConfig struct {
 }
 
 type VaultConsulSecretsAuthRole struct {
-	RequestId     string `json:"request_id"`
-	LeaseId       string `json:"lease_id"`
+	RequestID     string `json:"request_id"`
+	LeaseID       string `json:"lease_id"`
 	Renewable     bool   `json:"renewable"`
 	LeaseDuration int    `json:"lease_duration"`
 	Data          struct {
 		ConsulNamespace string   `json:"consul_namespace"`
 		ConsulRoles     []string `json:"consul_roles"`
+		ConsulPolicies  []string `json:"consul_policies"`
 		Lease           int      `json:"lease"`
 		Local           bool     `json:"local"`
-		MaxTtl          int      `json:"max_ttl"`
+		MaxTTL          int      `json:"max_ttl"`
 		Partition       string   `json:"partition"`
 		TokenType       string   `json:"token_type"`
-		Ttl             int      `json:"ttl"`
+		TTL             int      `json:"ttl"`
 	} `json:"data"`
 	WrapInfo interface{} `json:"wrap_info"`
 	Warnings interface{} `json:"warnings"`
@@ -103,11 +104,11 @@ func TestBasicConsulTokenIssuer(t *testing.T) {
 
 	assert.Equal(t, config.LeaseDuration, 0)
 	assert.Equal(t, config.Renewable, false)
-	assert.Equal(t, config.Data.Address, "http://127.0.0.1:8500")
-	assert.Equal(t, config.Data.Scheme, "http")
+	assert.Equal(t, config.Data.Address, "consul.service.consul:8501")
+	assert.Equal(t, config.Data.Scheme, "https")
 
-	// Inspect Vault Consul Token Role
-	url = fmt.Sprintf("%s/v1/__test_consul/roles/__test_consul", vaultAddr)
+	// Inspect Vault Consul Server Token Role
+	url = fmt.Sprintf("%s/v1/__test_consul/roles/__test-consul-server", vaultAddr)
 	body = GetAPI(url, vaultToken)
 	//fmt.Println(string(body))
 	var role VaultConsulSecretsAuthRole
@@ -117,7 +118,21 @@ func TestBasicConsulTokenIssuer(t *testing.T) {
 	}
 
 	assert.Equal(t, role.Renewable, false)
-	assert.DeepEqual(t, role.Data.ConsulRoles, []string{"__test_consul_policy"})
+	assert.Equal(t, role.Data.TTL, 0)
+	assert.DeepEqual(t, role.Data.ConsulPolicies, []string{"consul-server"})
+
+	// Inspect Vault Consul Ops Token Role
+	url = fmt.Sprintf("%s/v1/__test_consul/roles/__test-ops", vaultAddr)
+	body = GetAPI(url, vaultToken)
+	//fmt.Println(string(body))
+	err = json.Unmarshal(body, &role)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	assert.Equal(t, role.Renewable, false)
+	assert.Equal(t, role.Data.TTL, 86400)
+	assert.DeepEqual(t, role.Data.ConsulRoles, []string{"consul-ops"})
 }
 
 // Helper method to get Vault API for validation

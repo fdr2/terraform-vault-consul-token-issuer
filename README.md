@@ -11,15 +11,31 @@ Add the module and assign a consul policy for the tokens that will be issued.
 
 ```terraform
 module "vault-consul-token-issuer" {
-  source      = "./modules/terraform-vault-consul-token-issuer"
-  nomad_token = var.nomad_token
-  policies    = ["consul-ops"]
+  source       = "app.terraform.io/DiRoccos/consul-token-issuer/vault"
+  version      = "0.0.2"
+  backend_name = "${local.test_prefix}_consul"
+  consul_token = var.consul_token
+
+  default_lease_ttl_seconds = 3600  # 1 hour
+  max_lease_ttl_seconds     = 14400 # 4 hours
+
+  consul_roles = {
+    "consul-ops" : {
+      ttl : 14400 # Override the backend ttls (must be <= max_lease_ttl_seconds & max_ttl)
+      roles : [ # These roles should exist in Consul
+        "consul-ops"
+      ]
+    }
+    "consul-server" : {
+      # default ttl from the backend of 3600 seconds (1 hour)
+      # max ttl from backend of 14400 seconds (4 hours)
+      policies : [ # These policies should exist in Consul
+        "consul-server"
+      ]
+    }
+  }
 }
 
-resource "vault_policy" "consul-ops" {
-  name     = "consul-ops"
-  policy   = file("policies/consul-ops.hcl")
-}
 ```
 
 ## Contributors Prerequisites
@@ -58,7 +74,7 @@ pre-commit run -a
 ### Tests
 Login to Vault or issue a runner a VAULT_TOKEN environment variable.
 ```bash
-VAULT_HOST=https://vault.service.consul:8200 vault login -method=ldap username=$USER
+vault login -method=ldap username=$USER
 ```
 
 Ensure you have Go >= 1.19.5
@@ -70,6 +86,5 @@ go test
 
 ## TODO
 
-* write local vault dev example
-* write tests
-
+* ~~write local vault dev example~~
+* ~~write tests~~
