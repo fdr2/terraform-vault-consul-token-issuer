@@ -8,12 +8,12 @@ jobs:
       vault:
         image: hashicorp/vault:latest
         ports:
-          - 127.0.0.1:8200:127.0.0.1:8200
+          - 8200:8200
         env:
           THIS: that
-#        options: >-
-#          --opt1=2
-#          --opt2 three
+        options: >-
+          -dev
+          -dev-root-token-id="terraform-test-module"
     steps:
       - uses: actions/checkout@v4
       - name: Install go module
