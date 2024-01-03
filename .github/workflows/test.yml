@@ -12,8 +12,11 @@ jobs:
         env:
           THIS: that
         options: >-
-          -dev
-          -dev-root-token-id="terraform-test-module"
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+          --cmd '-dev -dev-root-token-id="terraform-test-module"'
     steps:
       - uses: actions/checkout@v4
       - name: Install go module
