@@ -1,5 +1,5 @@
 name: Test Terraform Module
-run-name: ${{ github.actor }} is learning GitHub Actions
+run-name: ${{ github.actor }} is testing Terraform Module via GitHub Actions
 on: [push]
 jobs:
   test-consul-module:
@@ -16,7 +16,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-          --cmd '-dev -dev-root-token-id="terraform-test-module"'
+          --command '-dev -dev-root-token-id="terraform-test-module"'
     steps:
       - uses: actions/checkout@v4
       - name: Install go module
