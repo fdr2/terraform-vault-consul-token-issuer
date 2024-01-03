@@ -18,5 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install go module
         run: |
+          ls -lash
+          env | sort
           cd test/basicconsultokenissuer
           go test
