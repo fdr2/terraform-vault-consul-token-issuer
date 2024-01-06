@@ -80,7 +80,7 @@ vault login -method=ldap username=$USER
 Ensure you have Go >= 1.19.5
 [Read more about terratest](https://terratest.gruntwork.io/docs/getting-started/quick-start/)
 ```bash
-cd test/main
+cd test/test/basicconsultokenissuer/
 go test
 ```
 
